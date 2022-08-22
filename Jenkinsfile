@@ -1,16 +1,13 @@
 pipeline {
     agent {
         docker {
-            image 'node:lts-bullseye-slim'
-            args '-p 49001:49001'
+            image 'node:lts-buster-slim'
+            args '-p 3000:3000'
         }
     }
     stages {
         stage('Build') {
             steps {
-                sh 'npm config rm proxy'
-                sh 'npm config rm https-proxy'
-                sh 'npm config set registry http://registry.npmjs.org/'
                 sh 'npm install'
             }
         }
@@ -19,7 +16,13 @@ pipeline {
                 sh './jenkins/scripts/test.sh'
             }
         }
+        stage('Deploy') { 
+            steps {
+                sh './jenkins/scripts/deliver.sh' 
+                input message: 'Sudah selesai menggunakan React App? (Klik "Proceed" untuk mengakhiri)' 
+                sh './jenkins/scripts/kill.sh' 
+            }
+        }
     }
 }
-
 // https://www.jenkins.io/doc/tutorials/build-a-node-js-and-react-app-with-npm/
